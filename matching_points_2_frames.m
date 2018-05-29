@@ -1,4 +1,4 @@
-function [matchedPointsA,matchedPointsB] = matching_points_seq_frames(imageA,imageB)
+function [matchedPointsA,matchedPointsB] = matching_points_2_frames(imageA,imageB)
     
     %detectando as features
     blobsA = detectKAZEFeatures(imageA);

@@ -40,7 +40,7 @@ end
 %esquerda
 [matchedPointsA,matchedPointsB] = matching_points_2_frames(im_left_gray,im_right);
 
-poinst3D = compute_3D_points(matchedPointsA.Location, matchedPointsB.Location, B);
+poinst3D = compute_3D_points(matchedPointsA.Location, matchedPointsB.Location, b);
 %apresentando as duas imagens e as features correlacionadas
 %figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsA, matchedPointsB);
 %legend('Imagem 1', 'Imagem2');
