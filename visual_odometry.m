@@ -1,20 +1,25 @@
 clear all;
 clc;
+close all;
 
 %carregando matrizes de projeção
-[cam0, cam1, cam2, cam3] = load_calib_txt();
+[P_rect0, P_rect1, P_rect2, P_rect3] = load_calib_txt();
 
 %baseline em relação a distancia focal
-B = -cam1(1,4);
-%baseline em metros
-B_m = B/cam1(1,1);
+Bf = -P_rect1(1,4);
+%distancial focal
+fu = P_rect0(1,1);
+fv = P_rect0(2,2);
+%centro da imagem
+cu = P_rect0(1,3);
+cv = P_rect0(2,3);
 
 %computando matrizes intrisecas das câmeras
 intrisic_cam0 = eye(3);
 intrisic_cam1 = eye(3);
 %convertendo para coordenadas homogêneas
-intrisic_cam0_h(1:3,1:3) = cam2(1:3,1:3);
-intrisic_cam1_h(1:3,1:3) = cam3(1:3,1:3);
+intrisic_cam0_h(1:3,1:3) = P_rect0(1:3,1:3);
+intrisic_cam1_h(1:3,1:3) = P_rect1(1:3,1:3);
 
 %carregando imagens
 im_left = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_0/000000.png');
@@ -27,7 +32,8 @@ if(size(im_left,3)>=3 && size(im_right,3)>=3)
     im_left_gray = rgb2gray(im_left);
     im_left2_gray = rgb2gray(im_left2);
     
-    
+    im_right_gray = rgb2gray(im_right);
+    im_right2_gray = rgb2gray(im_right2);
 else
     im_left_gray = im_left;
     im_left2_gray = im_left2;
@@ -38,9 +44,24 @@ end
 
 %fazendo a correspondencia entre os pontos da imagem da direita e da
 %esquerda
-[matchedPointsA,matchedPointsB] = matching_points_2_frames(im_left_gray,im_right);
+[matchedPointsL,matchedPointsR] = matching_points_2_frames(im_left_gray,im_right_gray);
 
-poinst3D = compute_3D_points(matchedPointsA.Location, matchedPointsB.Location, B);
+%computando os pontos 3D do matching
+points3D = compute_3D_points(matchedPointsL.Location, matchedPointsR.Location, Bf, fu,fv,cu,cv);
+
+%{
+x = ones(1,4);
+x(1:3) = points3D(2,:);
+x = x';
+x_i = P_rect1*x;
+%}
+
+%fazendo a correspondencia entre os pontos da imagem da esquerda no
+%instante t-1 com a imagem da esquerda no instante t
+[matchedPointsA,matchedPointsB] = matching_points_2_frames(im_left_gray,im_left2_gray);
+
+
+
 %apresentando as duas imagens e as features correlacionadas
 %figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsA, matchedPointsB);
 %legend('Imagem 1', 'Imagem2');
