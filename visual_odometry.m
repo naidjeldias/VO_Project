@@ -44,7 +44,7 @@ end
 
 %fazendo a correspondencia entre os pontos da imagem da direita e da
 %esquerda
-[matchedPointsL,matchedPointsR] = matching_points_2_frames(im_left_gray,im_right_gray);
+[matchedPointsL,matchedPointsR,features_t0,index_t0] = matching_points_2_frames(im_left_gray,im_right_gray);
 
 %computando os pontos 3D do matching
 points3D = compute_3D_points(matchedPointsL.Location, matchedPointsR.Location, Bf, fu,fv,cu,cv);
@@ -58,9 +58,9 @@ x_i = P_rect1*x;
 
 %fazendo a correspondencia entre os pontos da imagem da esquerda no
 %instante t-1 com a imagem da esquerda no instante t
-[matchedPointsA,matchedPointsB] = matching_points_2_frames(im_left_gray,im_left2_gray);
+[matchedPoints_t1, points3D_t0] = find_correspondence(features_t0,im_left2_gray, points3D, index_t0);
 
-
+pose = pose_estimation(points3D_t0, matchedPoints_t1.Location);
 
 %apresentando as duas imagens e as features correlacionadas
 %figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsA, matchedPointsB);

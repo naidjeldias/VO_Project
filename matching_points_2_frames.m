@@ -1,4 +1,4 @@
-function [matchedPointsA,matchedPointsB] = matching_points_2_frames(imageA,imageB)
+function [matchedPointsA,matchedPointsB,featuresA,index_t0] = matching_points_2_frames(imageA,imageB)
     
     %detectando as features
     blobsA = detectKAZEFeatures(imageA);
@@ -28,7 +28,8 @@ function [matchedPointsA,matchedPointsB] = matching_points_2_frames(imageA,image
 
     %extraindo os pontos que tiveram correspondencia
     matchedPointsA = validPointsA(indexPairs(:,1));
-    matchedPointsB = validPointsB(indexPairs(:,2));
+    matchedPointsB = validPointsB(indexPairs(:,2)); 
+    index_t0       = indexPairs(:,1);
 
 end
 
