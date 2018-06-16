@@ -49,6 +49,12 @@ end
 %computando os pontos 3D do matching
 points3D = compute_3D_points(matchedPointsL.Location, matchedPointsR.Location, Bf, fu,fv,cu,cv);
 
+%testes
+X = ones(1,4);
+X(1:3) = points3D(4,:);
+x   = P_rect0*X';
+x_l = P_rect1*X';
+
 %{
 x = ones(1,4);
 x(1:3) = points3D(2,:);
@@ -60,7 +66,7 @@ x_i = P_rect1*x;
 %instante t-1 com a imagem da esquerda no instante t
 [matchedPoints_t1, points3D_t0] = find_correspondence(features_t0,im_left2_gray, points3D, index_t0);
 
-pose = pose_estimation(points3D_t0, matchedPoints_t1.Location);
+pose = pose_estimation(points3D_t0, matchedPoints_t1.Location, intrisic_cam0_h);
 
 %apresentando as duas imagens e as features correlacionadas
 %figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsA, matchedPointsB);
