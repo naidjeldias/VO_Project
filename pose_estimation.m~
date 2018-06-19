@@ -11,8 +11,8 @@ function [pose_mat] = pose_estimation(points3D,pointsImage,K)
     
     %Estimando a matriz de câmera K e a matriz de rotação R usando decomposição RQ
     [K,R] = rq3(inv(M));
-    K = inv(K);   
-    R = R';
+    K = inv(K)   
+    R = R'
     
     %Computando a matriz de rotção 
     %Matriz de rotação no eixo z
@@ -27,9 +27,9 @@ function [pose_mat] = pose_estimation(points3D,pointsImage,K)
     sigma = atan(aux1(2,1)/aux1(2,2));
     Rysig = [cos(sigma) 0 sin(sigma);0 1 0;-sin(sigma) 0 cos(sigma)];
     %Matriz de rotação completa
-    R_l = Rxbt*Rysig*Rzth;
+    R_l = Rxbt*Rysig*Rzth
     %computando o vetor de translação
-    t = -(R'*inv(K)*[P_mat(1,4);P_mat(2,4);P_mat(3,4)]);
+    t = -(R'*inv(K)*[P_mat(1,4);P_mat(2,4);P_mat(3,4)])
     %construindo a matriz de pose
     pose_mat = horzcat(R_l,t)
         
