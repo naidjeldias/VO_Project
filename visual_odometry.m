@@ -1,58 +1,65 @@
 clear all;
 clc;
+close all;
 
-%carregando matrizes das câmeras
-fileId = fopen('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/calib.txt','r');
-formatSpec = '%d %f';
-calibInfo_size = [4 13];
-calibInfo = fscanf(fileId,formatSpec,calibInfo_size);
-fclose(fileId);
+%carregando matrizes de projeção
+[P_rect0, P_rect1, P_rect2, P_rect3] = load_calib_txt();
 
+%baseline em relação a distancia focal
+Bf = -P_rect1(1,4);
+%distancial focal
+fu = P_rect0(1,1);
+fv = P_rect0(2,2);
+%centro da imagem
+cu = P_rect0(1,3);
+cv = P_rect0(2,3);
+
+%computando matrizes intrisecas das câmeras
+intrisic_cam0 = eye(3);
+intrisic_cam1 = eye(3);
+%convertendo para coordenadas homogêneas
+intrisic_cam0_h(1:3,1:3) = P_rect0(1:3,1:3);
+intrisic_cam1_h(1:3,1:3) = P_rect1(1:3,1:3);
 
 %carregando imagens
-im_left = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_2/000000.png');
-im_right = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_3/000000.png');
-im_left2 = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_2/000001.png');
-im_right2 = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_3/000001.png');
+im_left = imread('images/imLeft00.png');
+im_right = imread('images/imRight00.png');
+im_left2 = imread('images/imLeft01.png');
+im_right2 = imread('images/imRight01.png');
 
 %convertendo para grayscale
-im_left_gray = rgb2gray(im_left);
-im_left2_gray = rgb2gray(im_left2);
+if(size(im_left,3)>=3 && size(im_right,3)>=3)
+    im_left_gray = rgb2gray(im_left);
+    im_left2_gray = rgb2gray(im_left2);
+    
+    im_right_gray = rgb2gray(im_right);
+    im_right2_gray = rgb2gray(im_right2);
+else
+    im_left_gray = im_left;
+    im_left2_gray = im_left2;
+    
+    im_right_gray = im_right;
+    im_right2_gray = im_right2;
+end
 
-%detectando as features
-blobsA = detectKAZEFeatures(im_left_gray);
-blobsB = detectKAZEFeatures(im_left2_gray);
-
-%plotando as features
-%{ 
-strongest = selectStrongest(blobsA,10);
-imshow(im_left);
-hold on;
-plot(strongest);
-hold off;
-%}
-
-%extraindo descritores
-[featuresA, validPointsA] = extractFeatures(im_left_gray, blobsA);
-[featuresB, validPointsB] = extractFeatures(im_left2_gray, blobsB);
-
-%
-%fazendo correspondência das features das duas imagens
-%Inputs:
-%   - unique: correspondencias unicas entre as imagens
-%   - MaxRatio: 0 < R < 1 limiar para remover ambiguidades
-%
-indexPairs = matchFeatures(featuresA, featuresB, 'Unique', true, 'MaxRatio', 0.3);
-numMatchedPoints = int32(size(indexPairs,1));
-
-%extraindo os pontos que tiveram correspondencia
-matchedPointsA = validPointsA(indexPairs(:,1));
-matchedPointsB = validPointsB(indexPairs(:,2));
+%fazendo a correspondencia entre os pontos da imagem da direita e da
+%esquerda
+[matchedPointsL,matchedPointsR,features_t0,index_t0] = matching_points_2_frames(im_left_gray,im_right_gray);
 
 %apresentando as duas imagens e as features correlacionadas
+figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsL, matchedPointsR);
+legend('Imagem da esquerda', 'Imagem da direita');
 
-figure; showMatchedFeatures(im_left_gray, im_left2_gray, matchedPointsA, matchedPointsB);
-legend('Imagem 1', 'Imagem2');
+%computando os pontos 3D do matching
+points3D = compute_3D_points(matchedPointsL.Location, matchedPointsR.Location, Bf, fu,fv,cu,cv);
+
+%fazendo a correspondencia entre os pontos da imagem da esquerda no
+%instante t-1 com a imagem da esquerda no instante t
+[matchedPoints_t1, points3D_t0] = find_correspondence(features_t0,im_left2_gray, points3D, index_t0);
+
+pose = pose_estimation(points3D_t0, matchedPoints_t1.Location, intrisic_cam0_h);
+
+
 
 
 
