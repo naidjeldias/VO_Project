@@ -22,10 +22,10 @@ intrisic_cam0_h(1:3,1:3) = P_rect0(1:3,1:3);
 intrisic_cam1_h(1:3,1:3) = P_rect1(1:3,1:3);
 
 %carregando imagens
-im_left = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_0/000000.png');
-im_right = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_1/000000.png');
-im_left2 = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_0/000001.png');
-im_right2 = imread('/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/image_1/000001.png');
+im_left = imread('images/imLeft00.png');
+im_right = imread('images/imRight00.png');
+im_left2 = imread('images/imLeft01.png');
+im_right2 = imread('images/imRight01.png');
 
 %convertendo para grayscale
 if(size(im_left,3)>=3 && size(im_right,3)>=3)
@@ -46,21 +46,12 @@ end
 %esquerda
 [matchedPointsL,matchedPointsR,features_t0,index_t0] = matching_points_2_frames(im_left_gray,im_right_gray);
 
+%apresentando as duas imagens e as features correlacionadas
+figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsL, matchedPointsR);
+legend('Imagem da esquerda', 'Imagem da direita');
+
 %computando os pontos 3D do matching
 points3D = compute_3D_points(matchedPointsL.Location, matchedPointsR.Location, Bf, fu,fv,cu,cv);
-
-%testes
-X = ones(1,4);
-X(1:3) = points3D(4,:);
-x   = P_rect0*X';
-x_l = P_rect1*X';
-
-%{
-x = ones(1,4);
-x(1:3) = points3D(2,:);
-x = x';
-x_i = P_rect1*x;
-%}
 
 %fazendo a correspondencia entre os pontos da imagem da esquerda no
 %instante t-1 com a imagem da esquerda no instante t
@@ -68,9 +59,7 @@ x_i = P_rect1*x;
 
 pose = pose_estimation(points3D_t0, matchedPoints_t1.Location, intrisic_cam0_h);
 
-%apresentando as duas imagens e as features correlacionadas
-%figure; showMatchedFeatures(im_left_gray, im_right_gray, matchedPointsA, matchedPointsB);
-%legend('Imagem 1', 'Imagem2');
+
 
 
 
