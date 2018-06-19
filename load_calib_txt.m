@@ -1,7 +1,6 @@
 
 function [cam0, cam1, cam2, cam3] = load_calib_txt()
-    %file_path = '/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/calib.txt';
-    file_path = 'calib.txt';
+    file_path = '/media/nigel/Dados/Documents/Projetos/KITTI DATASET/dataset/sequences/00/calib.txt';
     %carregando matrizes das câmeras
     fileId = fopen(file_path,'r');
     %lendo arquivo linha por linha
